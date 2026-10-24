@@ -23,14 +23,14 @@ LIBS="src/mesa/libmesa.a src/gallium/auxiliary/libgallium.a
 	src/mesa/glapi/glapi/libglapi_bridge.a src/mesa/glapi/shared-glapi/libglapi.a
 	src/util/libxmlconfig.a src/util/libmesa_util.a src/util/libmesa_util_simd.a src/util/blake3/libblake3.a
 	src/c11/impl/libmesa_util_c11.a"
+O=$H/out
+mkdir -p "$O"
 (cd "$B" && ninja $LIBS)
-nm -g "$B/src/mesa/glapi/glapi/libglapi_bridge.a" > "$H/out/bridge.nm"
+nm -g "$B/src/mesa/glapi/glapi/libglapi_bridge.a" > "$O/bridge.nm"
 CC="xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=16.0 -mcpu=kryo"
 INC="-I$H/include -I$M/include -I$M/src -I$M/src/mesa -I$M/src/mapi -I$M/src/gallium/include
 	-I$M/src/gallium/auxiliary -I$M/src/gallium/drivers -I$M/src/gallium/winsys
 	-I$B/src -I$B/src/mesa -I$B/src/mapi"
-O=$H/out
-mkdir -p "$O"
 # Mesa's configure-time defines (HAVE_PTHREAD, ...) as the state tracker gets them
 python3 -I -c '
 import json, shlex, sys
