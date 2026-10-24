@@ -26,8 +26,14 @@ jobs:
       - name: Install build tools
         run: |
           brew install meson ninja pkgconf
-          python3 -m pip install --break-system-packages mako pyyaml
-          python3 -c "import mako, yaml; print('Python deps OK')"
+          python3 -m pip install --break-system-packages mako pyyaml packaging
+          if which python >/dev/null; then
+            python -m pip install --break-system-packages mako pyyaml packaging || true
+          fi
+          if [ -x /Library/Frameworks/Python.framework/Versions/Current/bin/python ]; then
+            /Library/Frameworks/Python.framework/Versions/Current/bin/python -m pip install --break-system-packages mako pyyaml packaging || true
+          fi
+          python3 -c "import mako, yaml, packaging; print('Python deps OK')"
 
       - name: Select Xcode
         run: |
