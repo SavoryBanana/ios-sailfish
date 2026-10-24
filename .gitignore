@@ -4,6 +4,13 @@ dtb/
 recovery/
 # third-party/Apple sources fetched for reading, phone pulls, IPSW parts, firmware
 research/
+staging/
+firmware/
+out/
+OUT.txt*
+*.bin
+tools/lzfse
+tools/nbd-server-arm64
 # build outputs and boot images
 shim/out/
 xnu/out/

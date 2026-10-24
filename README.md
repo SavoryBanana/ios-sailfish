@@ -88,7 +88,7 @@ You need a Google Pixel 1 (`sailfish`) with an **unlocked bootloader**, a Mac wi
    ignition_level=1 wdt_test=no_user_checkin ufsrw=1 rootrw=1 launchd_unsecure_cache=1 wdt=-1
    sweetfb_noconsole=1 sweetsample=- sweetnull=backboardd cs_enforcement_disable=1 sweetprof=-
    sweetgpu=8 sweetgpuclk=600 sweetddr=1804 sweetenv=backboardd:DYLD_INSERT_LIBRARIES=/usr/lib/sweetgl.dylib
-   sailfishwlan=1
+   sailfishwlan=1 sweetdeny=assetsd,Poster,Widget
    ```
 
    Boot-args are limited to 608 bytes; longer command lines are cut off silently. Join a network from Settings (or add `sailfishssid=` / `sailfishpsk=` to join at boot).
