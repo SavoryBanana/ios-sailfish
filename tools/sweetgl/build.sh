@@ -10,7 +10,7 @@ R=$H/../..
 M=$R/research/mesa
 B=$R/research/mesa-ios
 export DEVELOPER_DIR=${DEVELOPER_DIR:-$R/research/xcode15/Xcode.app/Contents/Developer}
-export PATH=${PATH}:$R/research/tools/venv/bin:$R/research/tools/bin
+export PATH=/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:${PATH}:$R/research/tools/venv/bin:$R/research/tools/bin
 LIBS="src/mesa/libmesa.a src/gallium/auxiliary/libgallium.a
 	src/gallium/drivers/freedreno/libfreedreno.a src/gallium/winsys/freedreno/drm/libfreedrenowinsys.a
 	src/freedreno/drm/libfreedreno_drm.a src/freedreno/ir3/libfreedreno_ir3.a

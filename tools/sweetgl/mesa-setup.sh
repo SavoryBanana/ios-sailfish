@@ -4,7 +4,7 @@
 set -e
 R=$(cd "$(dirname "$0")/../.." && pwd)
 export DEVELOPER_DIR=${DEVELOPER_DIR:-$R/research/xcode15/Xcode.app/Contents/Developer}
-export PATH=${PATH}:$R/research/tools/venv/bin:$R/research/tools/bin
+export PATH=/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:${PATH}:$R/research/tools/venv/bin:$R/research/tools/bin
 python3 "$R/tools/sweetgl/gen-cross.py"
 cd "$R/research/mesa"
 rm -rf ../mesa-ios

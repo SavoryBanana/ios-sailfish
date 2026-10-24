@@ -25,7 +25,12 @@ jobs:
 
       - name: Install build tools
         run: |
-          brew install meson ninja pkgconf
+          brew install meson ninja pkgconf bison flex
+          echo "/opt/homebrew/opt/bison/bin" >> "$GITHUB_PATH"
+          echo "/opt/homebrew/opt/flex/bin" >> "$GITHUB_PATH"
+          export PATH="/opt/homebrew/opt/bison/bin:/opt/homebrew/opt/flex/bin:$PATH"
+          bison --version
+          flex --version
           python3 -m pip install --break-system-packages mako pyyaml packaging
           if which python >/dev/null; then
             python -m pip install --break-system-packages mako pyyaml packaging || true
