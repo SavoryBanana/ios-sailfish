@@ -5,7 +5,7 @@ on:
     inputs:
       mesa_version:
         description: "Mesa git ref or tag to build"
-        default: "mesa-24.0.0"
+        default: "main"
   push:
     branches: [main]
     paths:
@@ -40,8 +40,7 @@ jobs:
       - name: Fetch and patch Mesa
         run: |
           mkdir -p research
-          MESA_REF="${{ inputs.mesa_version || 'mesa-24.0.0' }}"
-          git clone --depth 1 --branch "$MESA_REF" https://github.com/mesa3d/mesa.git research/mesa || \
+          MESA_REF="${{ inputs.mesa_version || 'main' }}"
           git clone --depth 1 --branch "$MESA_REF" https://gitlab.freedesktop.org/mesa/mesa.git research/mesa
           cd research/mesa
           git apply --whitespace=nowarn "$GITHUB_WORKSPACE/tools/sweetgl/mesa.patch"
