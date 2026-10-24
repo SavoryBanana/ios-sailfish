@@ -51,26 +51,26 @@ jobs:
           CLANGXX=$(xcrun -find clang++)
           AR=$(xcrun -find ar)
           STRIP=$(xcrun -find strip)
-          cat <<EOF > tools/sweetgl/ios-cross.txt
-[binaries]
-c = ['$CLANG', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
-cpp = ['$CLANGXX', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
-objc = ['$CLANG', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
-ar = '$AR'
-strip = '$STRIP'
-pkg-config = 'false'
+          cat <<EOF | sed 's/^[ \t]*//' > tools/sweetgl/ios-cross.txt
+          [binaries]
+          c = ['$CLANG', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
+          cpp = ['$CLANGXX', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
+          objc = ['$CLANG', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
+          ar = '$AR'
+          strip = '$STRIP'
+          pkg-config = 'false'
 
-[built-in options]
-c_args = ['-I$GITHUB_WORKSPACE/tools/sweetgl/include']
-cpp_args = ['-I$GITHUB_WORKSPACE/tools/sweetgl/include']
+          [built-in options]
+          c_args = ['-I$GITHUB_WORKSPACE/tools/sweetgl/include']
+          cpp_args = ['-I$GITHUB_WORKSPACE/tools/sweetgl/include']
 
-[host_machine]
-system = 'darwin'
-subsystem = 'ios'
-cpu_family = 'aarch64'
-cpu = 'arm64'
-endian = 'little'
-EOF
+          [host_machine]
+          system = 'darwin'
+          subsystem = 'ios'
+          cpu_family = 'aarch64'
+          cpu = 'arm64'
+          endian = 'little'
+          EOF
           cat tools/sweetgl/ios-cross.txt
 
       - name: Setup Mesa build
