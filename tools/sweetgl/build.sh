@@ -9,8 +9,8 @@ H=$(cd "$(dirname "$0")" && pwd)
 R=$H/../..
 M=$R/research/mesa
 B=$R/research/mesa-ios
-export DEVELOPER_DIR=$R/research/xcode15/Xcode.app/Contents/Developer
-export PATH=$R/research/tools/venv/bin:$R/research/tools/bin:$PATH
+export DEVELOPER_DIR=${DEVELOPER_DIR:-$R/research/xcode15/Xcode.app/Contents/Developer}
+export PATH=${PATH}:$R/research/tools/venv/bin:$R/research/tools/bin
 LIBS="src/mesa/libmesa.a src/gallium/auxiliary/libgallium.a
 	src/gallium/drivers/freedreno/libfreedreno.a src/gallium/winsys/freedreno/drm/libfreedrenowinsys.a
 	src/freedreno/drm/libfreedreno_drm.a src/freedreno/ir3/libfreedreno_ir3.a
@@ -25,7 +25,7 @@ LIBS="src/mesa/libmesa.a src/gallium/auxiliary/libgallium.a
 	src/c11/impl/libmesa_util_c11.a"
 (cd "$B" && ninja $LIBS)
 nm -g "$B/src/mesa/glapi/glapi/libglapi_bridge.a" > "$H/out/bridge.nm"
-CC="xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=16.0"
+CC="xcrun -sdk iphoneos clang -arch arm64 -miphoneos-version-min=16.0 -mcpu=kryo"
 INC="-I$H/include -I$M/include -I$M/src -I$M/src/mesa -I$M/src/mapi -I$M/src/gallium/include
 	-I$M/src/gallium/auxiliary -I$M/src/gallium/drivers -I$M/src/gallium/winsys
 	-I$B/src -I$B/src/mesa -I$B/src/mapi"
@@ -44,7 +44,7 @@ for f in sweetgl sweet_drm eagl layerdump "$O/dispatch"; do
 	$CC -O2 -Wall -fvisibility=hidden @"$O/mesa-defines.rsp" $INC -I"$H" -c "$src" -o "$O/$(basename "$f").o"
 done
 printf '_sweetgl_init\n_sweetgl_create\n_sweetgl_make_current\n_sweetgl_destroy\n_sweetgl_selftest\n' > "$O/exports.txt"
-xcrun -sdk iphoneos clang++ -arch arm64 -miphoneos-version-min=16.0 -dynamiclib -dead_strip \
+xcrun -sdk iphoneos clang++ -arch arm64 -miphoneos-version-min=16.0 -mcpu=kryo -dynamiclib -dead_strip \
 	-install_name /usr/lib/sweetgl.dylib -exported_symbols_list "$O/exports.txt" \
 	-o "$O/sweetgl.dylib" "$O/sweetgl.o" "$O/sweet_drm.o" "$O/eagl.o" "$O/layerdump.o" "$O/dispatch.o" $(for l in $LIBS; do echo "$B/$l"; done) \
 	-framework IOKit -framework CoreFoundation -framework IOSurface -framework OpenGLES -framework CoreGraphics -lobjc -lc++ -lz

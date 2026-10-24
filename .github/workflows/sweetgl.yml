@@ -1,0 +1,99 @@
+name: sweetgl
+
+on:
+  workflow_dispatch:
+    inputs:
+      mesa_version:
+        description: "Mesa git ref or tag to build"
+        default: "mesa-24.0.0"
+  push:
+    branches: [main]
+    paths:
+      - "tools/sweetgl/**"
+      - ".github/workflows/sweetgl.yml"
+
+concurrency:
+  group: sweetgl-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-14
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build tools
+        run: |
+          brew install meson ninja pkg-config
+          python3 -m pip install mako
+
+      - name: Select Xcode
+        run: |
+          XC=$(ls -d /Applications/Xcode_*.app | sort -V | head -1)
+          echo "DEVELOPER_DIR=$XC/Contents/Developer" >> "$GITHUB_ENV"
+          sudo xcode-select -s "$XC"
+          xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-path
+
+      - name: Fetch and patch Mesa
+        run: |
+          mkdir -p research
+          MESA_REF="${{ inputs.mesa_version || 'mesa-24.0.0' }}"
+          git clone --depth 1 --branch "$MESA_REF" https://gitlab.freedesktop.org/mesa/mesa.git research/mesa
+          cd research/mesa
+          git apply "$GITHUB_WORKSPACE/tools/sweetgl/mesa.patch"
+
+      - name: Generate iOS Cross Configuration
+        run: |
+          SDK=$(xcrun --sdk iphoneos --show-sdk-path)
+          CLANG=$(xcrun -find clang)
+          CLANGXX=$(xcrun -find clang++)
+          AR=$(xcrun -find ar)
+          STRIP=$(xcrun -find strip)
+          cat <<EOF > tools/sweetgl/ios-cross.txt
+[binaries]
+c = ['$CLANG', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
+cpp = ['$CLANGXX', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
+objc = ['$CLANG', '-arch', 'arm64', '-isysroot', '$SDK', '-miphoneos-version-min=16.0', '-mcpu=kryo']
+ar = '$AR'
+strip = '$STRIP'
+pkg-config = 'false'
+
+[built-in options]
+c_args = ['-I$GITHUB_WORKSPACE/tools/sweetgl/include']
+cpp_args = ['-I$GITHUB_WORKSPACE/tools/sweetgl/include']
+
+[host_machine]
+system = 'darwin'
+subsystem = 'ios'
+cpu_family = 'aarch64'
+cpu = 'arm64'
+endian = 'little'
+EOF
+          cat tools/sweetgl/ios-cross.txt
+
+      - name: Setup Mesa build
+        run: |
+          cd research/mesa
+          meson setup ../mesa-ios --cross-file "$GITHUB_WORKSPACE/tools/sweetgl/ios-cross.txt" \
+            --buildtype=release -Db_ndebug=true -Ddefault_library=static \
+            -Dplatforms= -Degl=disabled -Dglx=disabled -Dgbm=disabled \
+            -Dgallium-drivers=freedreno -Dvulkan-drivers= -Dfreedreno-kmds=msm \
+            -Dllvm=disabled -Dgles1=disabled -Dgles2=enabled -Dopengl=true \
+            -Dzstd=disabled -Dzlib=disabled -Dexpat=disabled -Dxmlconfig=disabled \
+            -Dvalgrind=disabled -Dlibunwind=disabled -Dlmsensors=disabled \
+            -Dbuild-tests=false -Dshader-cache=disabled -Dperfetto=false \
+            -Dgallium-va=disabled -Dgallium-rusticl=false -Dtools= \
+            -Dhtml-docs=disabled -Ddisplay-info=disabled -Dteflon=false
+
+      - name: Build sweetgl.dylib
+        run: |
+          bash tools/sweetgl/build.sh
+          ls -la tools/sweetgl/out/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sweetgl
+          path: tools/sweetgl/out/sweetgl.dylib
+
